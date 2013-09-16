@@ -2,6 +2,9 @@
 <html>
 <head>
 <title>Ajax Framework</title>
+
+<script type="text/javascript" src="backend/buslog/dygraph-combined.js"></script>
+
 <script type="text/javascript">
 	var request = false;
 
@@ -149,6 +152,18 @@
 
 	<button onclick="javascript:down()">down</button>
 
+	<div id="demodiv"></div>
+
+	<script type="text/javascript">
+		g = new Dygraph(document.getElementById("demodiv"), "ny-vs-sf.txt", {
+			rollPeriod : 14,
+			showRoller : true,
+			customBars : true,
+			title : 'NYC vs. SF',
+			ylabel : 'Temperature (F)',
+			legend : 'always'
+		});
+	</script>
 
 </body>
 </html>
