@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Ajax Framework</title>
+<script type="text/javascript">
+	var request = false;
+
+	var svgNS = "http://www.w3.org/2000/svg";
+
+	var myCircle = document.createElementNS(svgNS, "circle"); //to create a circle, for rectangle use rectangle
+
+	// Request senden
+	function setRequest() {
+		// Request erzeugen
+		if (window.XMLHttpRequest) {
+			request = new XMLHttpRequest(); // Mozilla, Safari, Opera
+		} else if (window.ActiveXObject) {
+			try {
+				request = new ActiveXObject('Msxml2.XMLHTTP'); // IE 5
+			} catch (e) {
+				try {
+					request = new ActiveXObject('Microsoft.XMLHTTP'); // IE 6
+				} catch (e) {
+				}
+			}
+		}
+
+		// überprüfen, ob Request erzeugt wurde
+		if (!request) {
+			alert("Kann keine XMLHTTP-Instanz erzeugen");
+			return false;
+		} else {
+			var url = "backend/buslog/main.php";
+			// Request öffnen
+			request.open('post', url, true);
+			// Request senden
+			request.send(null);
+			// Request auswerten
+			request.onreadystatechange = interpretRequest;
+		}
+	}
+
+	// Request auswerten
+	function interpretRequest() {
+		switch (request.readyState) {
+		// wenn der readyState 4 und der request.status 200 ist, dann ist alles korrekt gelaufen
+		case 4:
+			if (request.status != 200) {
+				alert("Der Request wurde abgeschlossen, ist aber nicht OK\nFehler:"
+						+ request.status);
+			} else {
+				var content = request.responseText;
+				// den Inhalt des Requests in das <div> schreiben
+				document.getElementById('content').innerHTML = content;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	// JSON-Test
+	function jsontest() {
+
+		//alert("test");
+
+		var txt = '{ "employees" : ['
+				+ '{ "firstName":"John" , "lastName":"Doe" },'
+				+ '{ "firstName":"Anna" , "lastName":"Smith" },'
+				+ '{ "firstName":"Peter" , "lastName":"Jones" } ]}';
+
+		var lastgang = [ {
+			"date" : 40909,
+			"value" : 16.8
+		}, {
+			"date" : 40910,
+			"value" : 16
+		}, {
+			"date" : 40911,
+			"value" : 16
+		}, {
+			"date" : 40912,
+			"value" : 18
+		}, {
+			"date" : 40913,
+			"value" : 14.6
+		}, {
+			"date" : 40914,
+			"value" : 16.8
+		} ];
+
+		var obj = eval("(" + txt + ")");
+
+		//for ( var i = 0; i <= 1; i++) {
+		//	alert(obj.employees[i].firstName);
+		//}
+
+		for ( var i = 0; i < lastgang.length; i++) {
+			//alert("date: " + getJsDateFromExcel(41089) + " value: "
+			//		+ lastgang[i].value);
+		}
+
+		/*
+		 * Now the chart!
+		 */
+
+		myCircle.setAttributeNS(null, "id", "mycircle");
+		myCircle.setAttributeNS(null, "cx", 100);
+		myCircle.setAttributeNS(null, "cy", 100);
+		myCircle.setAttributeNS(null, "r", 50);
+		myCircle.setAttributeNS(null, "fill", "black");
+		myCircle.setAttributeNS(null, "stroke", "none");
+
+		document.getElementById("mySVG").appendChild(myCircle);
+
+	}
+
+	function down() {
+		myCircle.setAttributeNS(null, "cy", myCircle.getAttribute("cx") - 5);
+	}
+
+	function getJsDateFromExcel(excelDate) {
+
+		// JavaScript dates can be constructed by passing milliseconds
+		// since the Unix epoch (January 1, 1970) example: new Date(12312512312);
+
+		// 1. Subtract number of days between Jan 1, 1900 and Jan 1, 1970, plus 1 (Google "excel leap year bug")             
+		// 2. Convert to milliseconds.
+
+		return new Date((excelDate - (25567 + 1)) * 86400 * 1000);
+
+	}
+//-->
+</script>
+</head>
+<body>
+
+	<button onclick="javascript:jsontest()">JSON-Test</button>
+
+	<br>
+
+	<a href="javascript:setRequest()">klick mich an</a>
+	<div id="content">
+		<img alt="gruen1" src="./rot.png">
+	</div>
+
+	<svg id="mySVG" xmlns="http://www.w3.org/2000/svg"
+		xmlns:xlink="http://www.w3.org/1999/xlink"> </svg>
+
+	<button onclick="javascript:down()">down</button>
+
+
+</body>
+</html>
