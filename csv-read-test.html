@@ -56,6 +56,10 @@
 	<div id="progress_bar">
 		<div class="percent">0%</div>
 	</div>
+	<br>
+	<input type="file" id="fileinput" />
+
+	<!-- first version -->
 
 	<script>
 		var reader;
@@ -90,20 +94,19 @@
 				if (percentLoaded < 100) {
 					progress.style.width = percentLoaded + '%';
 					progress.textContent = percentLoaded + '%';
-				} else {
-					alert("reading finished");
-					readingFinished();
 				}
 			}
 		}
 
 		function readingFinished() {
+
 			g = new Dygraph(document.getElementById("demodiv"), values, {
 				title : 'ein anderer Lastgang',
 				legend : 'always',
 				showRangeSelector : true,
 				labels : [ "Time", "Drain" ]
 			});
+
 		}
 
 		function handleFileSelect(evt) {
@@ -114,12 +117,15 @@
 			reader = new FileReader();
 			reader.onerror = errorHandler;
 			reader.onprogress = updateProgress;
+
 			reader.onabort = function(e) {
 				alert('File read cancelled');
 			};
+
 			reader.onloadstart = function(e) {
 				document.getElementById('progress_bar').className = 'loading';
 			};
+
 			reader.onload = function(e) {
 				// Ensure that the progress bar displays 100% at the end.
 				progress.style.width = '100%';
@@ -127,6 +133,9 @@
 				setTimeout(
 						"document.getElementById('progress_bar').className='';",
 						2000);
+
+				alert("reading finished");
+
 			}
 
 			// Read in the image file as a binary string.
@@ -136,6 +145,48 @@
 		document.getElementById('files').addEventListener('change',
 				handleFileSelect, false);
 	</script>
+
+	<!-- second version -->
+
+	<script type="text/javascript">
+		function readSingleFile(evt) {
+			//Retrieve the first (and only!) File from the FileList object
+			var f = evt.target.files[0];
+
+			if (f) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					var contents = e.target.result;
+					alert("Got the file.\n" + "name: " + f.name + "\n"
+							+ "type: " + f.type + "\n" + "size: " + f.size
+							+ " bytes\n" + "starts with: "
+							+ contents.substr(0, contents.indexOf("\n")));
+
+					g = new Dygraph(document.getElementById("demodiv"), values,
+							{
+								title : 'nochmal ein anderer Lastgang',
+								legend : 'always',
+								showRangeSelector : true,
+								labels : [ "Time", "Drain" ]
+							});
+
+					alert(contents);
+
+				}
+				reader.readAsText(f);
+
+				var string = reader.result;
+				<!-- alert(string); -->
+
+			} else {
+				alert("Failed to load file");
+			}
+		}
+
+		document.getElementById('fileinput').addEventListener('change',
+				readSingleFile, false);
+	</script>
+
 
 </body>
 </html>
