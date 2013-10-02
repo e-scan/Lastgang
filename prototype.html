@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>e-Scan Prototype</title>
+
+<!-- Dygraph-Lib -->
+<script type="text/javascript" src="lib/dygraph-combined.js"></script>
+
+<script type="text/javascript">
+	var values = [ [ new Date(2012, 1, 1, 0, 0), 5 ],
+			[ new Date(2012, 1, 1, 0, 15), 20 ],
+			[ new Date(2012, 1, 1, 0, 45), 13 ],
+			[ new Date(2012, 1, 1, 1, 0), 14 ],
+			[ new Date(2012, 1, 1, 1, 15), null ],
+			[ new Date(2012, 1, 1, 1, 30), 15 ],
+			[ new Date(2012, 1, 1, 1, 45), 10 ],
+			[ new Date(2012, 1, 1, 2, 0), 4 ],
+			[ new Date(2012, 1, 1, 2, 15), 17 ],
+			[ new Date(2012, 1, 1, 2, 30), 15 ] ];
+</script>
+
+</head>
+
+<body>
+
+	<h1>e-Scan Prototype</h1>
+
+	<!-- File-Input -->
+
+	<input type="file" id="fileinput" />
+
+	<script type="text/javascript">
+		function readSingleFile(evt) {
+			//Retrieve the first (and only!) File from the FileList object
+			var f = evt.target.files[0];
+
+			if (f) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					var contents = e.target.result;
+					alert("Got the file.\n" + "name: " + f.name + "\n"
+							+ "type: " + f.type + "\n" + "size: " + f.size
+							+ " bytes\n" + "starts with: "
+							+ contents.substr(0, contents.indexOf("\n")));
+
+					g = new Dygraph(document.getElementById("demodiv"), values,
+							{
+								title : 'nochmal ein anderer Lastgang',
+								legend : 'always',
+								showRangeSelector : true,
+								labels : [ "Time", "Drain" ]
+							});
+
+					alert(contents);
+
+				}
+				reader.readAsText(f);
+
+				var string = reader.result;
+				<!--
+				alert(string);
+				-->
+
+			} else {
+				alert("Failed to load file");
+			}
+		}
+
+		document.getElementById('fileinput').addEventListener('change',
+				readSingleFile, false);
+	</script>
+
+	<!-- Dygraph -->
+
+	<div id="demodiv"></div>
+
+	<script type="text/javascript">
+		g = new Dygraph(document.getElementById("demodiv"), values, {
+			title : 'ein Lastgang',
+			legend : 'always',
+			showRangeSelector : true,
+			labels : [ "Time", "Drain" ]
+		});
+	</script>
+
+	<!-- operation via AJAX and JSON -->
+
+	<button onclick="javascript:setRequest()">Halbierung der Werte</button>
+
+	<script type="text/javascript">
+		var request = false;
+
+		// Request senden
+		function setRequest(value) {
+			// Request erzeugen
+			if (window.XMLHttpRequest) {
+				request = new XMLHttpRequest(); // Mozilla, Safari, Opera
+			} else if (window.ActiveXObject) {
+				try {
+					request = new ActiveXObject('Msxml2.XMLHTTP'); // IE 5
+				} catch (e) {
+					try {
+						request = new ActiveXObject('Microsoft.XMLHTTP'); // IE 6
+					} catch (e) {
+					}
+				}
+			}
+
+			// überprüfen, ob Request erzeugt wurde
+			if (!request) {
+				alert("Kann keine XMLHTTP-Instanz erzeugen");
+				return false;
+			} else {
+				var url = "backend/buslog/operations.php";
+				// Request öffnen
+				request.open('post', url, true);
+				// Requestheader senden
+				request.setRequestHeader('Content-Type',
+						'application/x-www-form-urlencoded');
+				// Request senden
+				request.send('values=' + values);
+				// Request auswerten
+				request.onreadystatechange = interpretRequest;
+			}
+		}
+
+		// Request auswerten
+		function interpretRequest() {
+			switch (request.readyState) {
+			// wenn der readyState 4 und der request.status 200 ist, dann ist alles korrekt gelaufen
+			case 4:
+				if (request.status != 200) {
+					alert("Der Request wurde abgeschlossen, ist aber nicht OK\nFehler:"
+							+ request.status);
+				} else {
+					var content = request.responseText;
+					// den Inhalt des Requests in das <div> schreiben
+					alert(content);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	</script>
+
+</body>
+
+</html>
